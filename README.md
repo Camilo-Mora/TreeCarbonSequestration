@@ -41,3 +41,12 @@ The result is a time series projection of the CO2 likely to be removed by a tree
 
 
 Tree CO2 sequestration calculator
+
+  <br><br>          
+Tree diameter at Breast Height: <input type="number" id="TreeDiameter" value="">
+
+
+<select name="Units" id="Units">
+    <option value="1">Inches</option>
+    <option value="2">Centimeters</option>
+</select>
