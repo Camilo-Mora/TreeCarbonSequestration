@@ -1,0 +1,340 @@
+<head>
+    <title>Mora Lab - Tree carbon storage calculator</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="description" content="Laboratory of Camilo Mora at the University of Hawaii: Outreach projects to increase Public Awareness on Environmental Issues.">
+    <meta name="keywords" content="Camilo Mora, The Mora Lab, Public Outreach, YouTube, Fish, Marine Animal Populations, Census of Marine Life, models, prediction, extinction, statistics, meta-analysis, research, coral reefs">
+    <meta name="author" content="Camilo Mora">
+
+
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+  
+    
+ 
+    
+    <script>
+        function myFunction() {
+            var AccumulatedCO2 = 0;
+            var TreeDiameter = document.getElementById("TreeDiameter").value;
+            var Results = [];
+            var CO2 = "";
+            var d = new Date();
+            var YearPlanted = d.getFullYear();
+            var YearOfCalculation = d.getFullYear();
+
+            //--start--adjust for the units of the tree diameter selected by the user
+            var UnitSelected = document.getElementById('Units').options[document.getElementById('Units').selectedIndex].value;
+            if (UnitSelected == 1) {
+                var TreeDiameter = TreeDiameter / 0.393701;
+            } else {
+                var TreeDiameter = TreeDiameter;
+            }
+            //--end--adjust for the units of the tree diameter selected by the user
+
+
+            for (i = 0; i <= 85; i++) {
+                YearOfCalculation = i + 2015;
+                if (YearOfCalculation >= YearPlanted) {
+
+                    //Body mass (kg dry above groung matter) from Chave et al (2001):
+                    BodyMass = 0.0998 * (Math.pow(TreeDiameter, 2.5445));
+
+                    //Growth Rate (kg dry above groung matter/ plant /yr) from Niklas & Enquist (2001):
+                    GrowthRate = 0.208 * (Math.pow(BodyMass, 0.763));
+
+                    //dK/dy Above ground, this is the rate of production at each year assuming log decline:
+                    dKdY = (Math.exp(1 - (((GrowthRate * Math.exp(1)) * (YearOfCalculation - YearPlanted)) / BodyMass)) / Math.exp(1)) * (GrowthRate * Math.exp(1));
+
+                    //Adding Below ground Using Cairns et al (1997) factor of 24% of above ground biomass:
+                    dKdYT = dKdY * 1.24;
+
+                    //Carbon content Using Kirby & Potvin (2007) factor of 47% of total dry weight:
+                    Carbon = dKdYT * 0.47;
+
+                    //CO2 sequestration.Conversion of Carbon in treee to CO2:
+                    CO2 = Carbon * 3.6663;
+
+                    //adds CO2 over the years:
+                    AccumulatedCO2 = AccumulatedCO2 + CO2;
+
+                    //Generates data.frame that includes year:
+                    Results[i] = Math.round(AccumulatedCO2 * 10) / 10;
+
+                } else {
+                    Results[i] = 0;
+                }
+
+            }
+
+
+            document.getElementById("demo").innerHTML = "This tree will sequester " + parseInt(AccumulatedCO2) + " Kg of CO2 over its life time";
+
+
+            setTimeout(function() {
+
+                // generates a variable with the data to be plotted in the x-y chart
+                var Results1 = Results;
+
+
+                $('#container').highcharts({
+
+                    chart: {
+                        type: 'scatter',
+                        zoomType: 'x'
+                    },
+                    title: {
+                        text: 'Projected CO2 stored by this tree'
+                    },
+                    tooltip: {
+                        headerFormat: '<b></b>',
+                        pointFormat: "It will sequester {point.y}kg by {point.x:%Y}",
+                        hideDelay: 1
+                    },
+                    xAxis: {
+                        type: 'datetime',
+                        title: {
+                            text: 'Year'
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'CO2 sequestered (kg)'
+                        },
+                        min: 0
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        area: {
+                            fillColor: {
+                                linearGradient: {
+                                    x1: 0,
+                                    y1: 0,
+                                    x2: 0,
+                                    y2: 1
+                                },
+                                stops: [
+                                    [0, Highcharts.getOptions().colors[0]],
+                                    [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                                ]
+                            },
+                            marker: {
+                                radius: 2
+                            },
+                            lineWidth: 1,
+                            states: {
+                                hover: {
+                                    lineWidth: 1
+                                }
+                            },
+                            threshold: null
+                        }
+                    },
+
+                    series: [{
+                        type: 'area',
+                        name: 'Cummulative CO2 stored',
+                        pointInterval: 365 * 24 * 3600000,
+                        pointStart: Date.UTC(2015, 0, 1),
+                        data: Results1
+                    }]
+                });
+
+            }, 1);
+
+        }
+    </script>
+    
+    
+</head>
+
+<body>
+    <div class="main1">
+        <div class="header">
+
+            <div class="header_resize">
+                <div class="logo">
+                    <br>
+                    <h1>Mora<span>Lab</span></h1>
+                    <font size="1.9" color="white"><i>making the world a better place one paper at a time</i></font>
+                    <br>
+                    <br>
+                </div>
+
+                <div class="menu_nav">
+                    <ul>
+                        <li><a href="index.html"><span>Home</span></a>
+                        </li>
+                        <li><a href="Team.html"><span>Team</span></a>
+                        </li>
+                        <li><a href="Publications.html"><span>Publications</span></a>
+                        </li>
+                        <li><a href="Courses.html"><span>Courses</span></a>
+                        </li>
+                        <li><a href="PressRoom.html"><span>Press</span></a>
+                        </li>
+                        <li><a href="OnTheNews.html"><span>In the news</span></a>
+                        </li>
+                        <li><a href="Resources.html"><span>Resources</span></a>
+                        </li>
+                        <li><a href="Carbon Neutrality Project"><span>CO2 Neutrality</span></a>
+                        </li>
+                    </ul>
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="content" style="margin-left: 0px; margin-top: -6px;">
+
+        <div class="content_resize">
+
+
+<table width="900" border="0" align="center" style="pointer-events: auto;">
+
+
+    <tr>
+        <td colspan="2" align="center">
+            <br><br>
+            <strong><span style="font-size:20px; color: #006;">Tree carbon storage calculator<br></span></strong>
+            by Camilo Mora, Ph.D.
+            <br><br>
+        </td>
+    </tr>
+
+    <tr>
+        <td width="700" colspan="2" valign="top">
+
+            <p style="text-align:center;">
+                <img src="images/Carbon sequestration.png" width="900">
+
+                <br>
+            </p>
+
+        </td>
+
+    </tr>
+
+
+
+    <tr>
+        <td width="700" colspan="2" valign="top">
+            <p line-height: 1.2; style="font-size:18px">
+                <strong>Summary: </strong> Climate change is truly a terrifying thing. By increasing the amount of CO2 in the atmosphere, we are increasing the temperature of the planet, which in turn is increasing drought, heatwaves and wildfires in some areas, and extreme precipitation and floods in others. Add sea-level rise to the mixture and you get the picture. All these climatic hazards have the capacity to make humanity sicker, hungrier, thirsty, homeless, poor, and unsafe. 
+                
+                <br><br>Remarkably, all these disasters can be traced back to a simple unbalance of the Earth's atmospheric CO2 concentration: we produce more CO2 than it can be removed.
+                
+                From this perspective, averting the threat of climate change will require some degree of luck discovering new types of "green"/zero-emissions energy, or a considerable improvement of existing methods that capture carbon emissions; and trees, may be just what we need. Trough photosynthesis, trees break some of the “nasty” CO2 we produce into carbon, which they store, and oxygen, which they release: a win-win.
+                 <br><br>
+                This app has been developed using several published equations to estimate the amount of CO2 that can be stored as carbon in a tree.
+            
+                
+        <br><br>
+        <strong>Background: </strong>  Firsts, we need to start by understanding "allometric" relationships. Basically, as any individual grows, parts of its body will most likely correlate with other body parts; like the length of your arms relates to the length of your legs. Thus, by knowing a single attribute of the individual, you can predict other attributes of that individual. <br><br>
+            
+        In the case of trees, Chave et al (2001) collected data from 12 different studies that predicted tree above ground biomass by simply knowing the tree Diameter at Breast Height or so called "DBH". In their article, they reported 12 mathematical equations, which I display below:
+        <p style="text-align:center;">
+                                <img src="images/Body mass.png" width="700" align="center"><br> Above ground tree mass predictions based on tree diameter.
+                                <br>
+                            </p>        
+        Using multi-model averaging from the studies reported by Chave et al (2001), then one can predict above ground dry body mass as:        
+
+        <br><br>         
+       
+                
+        <p style="text-align:center;">Body Mass =0.0998 * DBH^2.5445  </p>       
+        
+            <br>         
+       
+          In turn, Niklas & Enquist (2001) found that one can use tree body mass to predict their growth rate, as:
+            <br> <br> 
+            <p style="text-align:center;">Growth Rate =0.208 * Body Mass^0.763  </p>    
+            
+            
+           <br>    
+           By knowing the weight of a tree, and their growth rate, one could predict the weight of the tree at different time intervals. Just like a pediatrician is able to predict the approximate weight of a child at different ages.
+<br><br> 
+ Until now, all weight calculations are for the part of the tree that one sees above ground. It turns out, that Cairns et al (1997) found that below ground biomass is about 24% the weight of the tree above ground.
+ <br><br>            
+ So we need to multiply the tree mass from Chave et al . (2001) by 1.24. That is, the weight of the tree above ground, plus the 0.24 fraction below ground.
+  <br><br>  
+Up to this moment, we have been able to calculate the weight of the tree (below and above ground), but not all that weight is carbon.
+            <br><br> As one may expect, the tissue of the tree has many other chemical elements.    Lucky for us, Kirby & Potvin (2007) found that 47% of the dry weight of a tree is carbon. So, we can simply multiply our estimated weight of a tree by 0.47 to know the approximated carbon in the given tree.
+  <br><br> 
+Ok, we now have a good approximation to the carbon stored in a tree. But carbon is different from CO2. CO2 has two molecules of oxygen, so it is heavier. The molecular weight of carbon is 12.0107, while that of oxygen is 15.999. So the molecular weight of CO2 is 44.0087 or 3.6663 times heavier that carbon alone. 
+            
+<br><br> So to estimate the CO2 that could be taken from the atmosphere by a tree, one needs to multiply the weight of the carbon in the tree by 3.6663. 
+            
+<br><br>The result is a time series projection of the CO2 likely to be removed by a tree from the atmosphere and stored in its body by simply knowing the diameter of the tree.
+            
+    
+    <br><br><br> <br><br> 
+  <strong><span style="font-size:20px; color: #006;">Tree CO2 sequestration calculator</span></strong>             
+  <br><br>          
+Tree diameter at Breast Height: <input type="number" id="TreeDiameter" value="">
+
+
+<select name="Units" id="Units">
+    <option value="1">Inches</option>
+    <option value="2">Centimeters</option>
+</select>
+
+
+<button onclick="myFunction()">Calculate</button>
+
+<p id="demo"></p>
+
+<div id="container" style="width:100%; height:300px;"></div>
+
+
+               
+                
+                
+                
+                
+  <br>The Tree CO2 sequestration calculator was developed by Camilo Mora.               
+                
+                
+  <br><br><br><br><br><br>              
+                
+                
+                
+                
+                
+                
+        
+        </td>
+
+    </tr>
+
+
+
+
+
+
+</table>
+
+
+
+
+
+           
+
+    </div> </div>
+
+
+
+
+
+
+
+
+
+
+</body>
